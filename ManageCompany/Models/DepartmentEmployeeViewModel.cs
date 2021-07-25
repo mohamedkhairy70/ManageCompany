@@ -13,8 +13,8 @@ namespace ManageCompany.Models
         public byte[] Image { get; set; }
         public int DepartmentId { get; set; }
         public string DepartmentName { get; set; }
-        public string DepartmentDescription { get; set; }
-        public byte[] DepartmentLogo { get; set; }
+        public string? DepartmentDescription { get; set; }
+        public byte[]? DepartmentLogo { get; set; }
         
     }
 }
