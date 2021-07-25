@@ -46,6 +46,7 @@ namespace ManageCompany.Models
             }
         }
 
+
         // check Department Async By Name
         public async Task<Department> GetDepartmentByName(string Name) => await context.Departments.Where(d => d.Name == Name).FirstOrDefaultAsync();
 
@@ -57,5 +58,34 @@ namespace ManageCompany.Models
 
         // Get all Employee Async
         public async Task<IEnumerable<Employee>> GetEmployees() => await context.Employees.Include(d=>d.Department).ToListAsync();
+
+        public async Task<Employee> UpdateEmployee(Employee employee)
+        {
+            if (context.Employees.Where(d => d.Name == employee.Name).Any())
+            {
+                context.Employees.Update(employee);
+                await context.SaveChangesAsync();
+                return employee;
+            }
+            else
+            {
+                return null;
+            }
+        }
+        public async Task<bool> DeleteEmployee(Employee employee)
+        {
+            if (context.Employees.Where(d => d.Name == employee.Name).Any())
+            {
+                context.Employees.Remove(employee);
+                await context.SaveChangesAsync();
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public async Task<Employee> FindEmployee(int Id) => await context.Employees.FindAsync(Id);
     }
 }

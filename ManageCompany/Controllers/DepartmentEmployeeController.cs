@@ -51,14 +51,13 @@ namespace ManageCompany.Controllers
                 return NotFound();
             }
 
-            var departmentEmployeeAwiat = await reporistory.GetEmployees();
-            var departmentEmployeeOne = departmentEmployeeAwiat.FirstOrDefault(m => m.Id == id);
-            if (departmentEmployeeOne == null)
+            var EmployeeOne = await reporistory.FindEmployee(id ?? 0);
+            if (EmployeeOne == null)
             {
                 return NotFound();
             }
 
-            return View(mapper.Map<Employee,DepartmentEmployeeViewModel>(departmentEmployeeOne));
+            return View(mapper.Map<Employee,DepartmentEmployeeViewModel>(EmployeeOne));
         }
 
         // GET: DepartmentEmployee/Create
@@ -130,13 +129,12 @@ namespace ManageCompany.Controllers
                 return NotFound();
             }
 
-            var departmentEmployeeAwiat = await reporistory.GetDepartments();
-            var departmentEmployeeOne = departmentEmployeeAwiat.FirstOrDefault(m => m.Id == id);
-            if (departmentEmployeeOne == null)
+            var EmployeeOne = await reporistory.FindEmployee(id??0);
+            if (EmployeeOne == null)
             {
                 return NotFound();
             }
-            return View(departmentEmployeeOne);
+            return View(mapper.Map<Employee, DepartmentEmployeeViewModel>(EmployeeOne));
         }
 
         // POST: DepartmentEmployee/Edit/5
@@ -155,12 +153,28 @@ namespace ManageCompany.Controllers
             {
                 try
                 {
-                    //_context.Update(departmentEmployeeViewModel);
-                    //await _context.SaveChangesAsync();
+                    var employee = await reporistory.GetEmployeeByName(departmentEmployeeViewModel.Name);
+
+                    if (employee != null)
+                    {
+                        employee = new Employee
+                        {
+                            Name = departmentEmployeeViewModel.Name,
+                            Image = departmentEmployeeViewModel.Image,
+                            DateOfBirth = departmentEmployeeViewModel.DateOfBirth,
+                        };
+                        await reporistory.UpdateEmployee(employee);
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DepartmentEmployeeViewModelExists(departmentEmployeeViewModel.Id).Result)
+                    var EmployeeOne = await reporistory.FindEmployee(id);
+                    if (EmployeeOne == null)
                     {
                         return NotFound();
                     }
@@ -182,14 +196,13 @@ namespace ManageCompany.Controllers
                 return NotFound();
             }
 
-            var departmentEmployeeAwiat = await reporistory.GetDepartments();
-            var departmentEmployeeOne = departmentEmployeeAwiat.FirstOrDefault(m => m.Id == id);
-            if (departmentEmployeeOne == null)
+            var EmployeeOne = await reporistory.FindEmployee(id ?? 0);
+            if (EmployeeOne == null)
             {
                 return NotFound();
             }
 
-            return View(departmentEmployeeOne);
+            return View(mapper.Map<Employee, DepartmentEmployeeViewModel>(EmployeeOne));
         }
 
         // POST: DepartmentEmployee/Delete/5
@@ -197,17 +210,19 @@ namespace ManageCompany.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            //var departmentEmployeeViewModel = await _context.DepartmentEmployeeViewModel.FindAsync(id);
-            //_context.DepartmentEmployeeViewModel.Remove(departmentEmployeeViewModel);
-            //await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
 
-        private async Task<bool> DepartmentEmployeeViewModelExists(int id)
-        {
-            var departmentEmployeeAwiat = await reporistory.GetDepartments();
-            var departmentEmployeeOne = departmentEmployeeAwiat.Any(m => m.Id == id);
-            return departmentEmployeeOne;
+            var employee = await reporistory.FindEmployee(id);
+
+            if (employee != null)
+            {
+
+                await reporistory.DeleteEmployee(employee);
+            }
+            else
+            {
+                return NotFound();
+            }
+            return RedirectToAction(nameof(Index));
         }
     }
 }
